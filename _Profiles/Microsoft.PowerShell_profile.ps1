@@ -1,24 +1,27 @@
-<#	
-	.SYNOPSIS
-		Profile File
-	.DESCRIPTION
-		Profile File
-	.NOTES
-		Francois-Xavier Cat
-		www.lazywinadmin.com
-		@lazywinadm
+<#
+    .SYNOPSIS
+        Profile File
+    .DESCRIPTION
+        Profile File
+    .NOTES
+        Francois-Xavier Cat
+        lazywinadmin.com
+        @lazywinadmin
 #>
 
 #########################
-# Window, Path and Help #
+# WINDOWS, PATH, HELP   #
 #########################
-# Set the Path
-Set-Location -Path c:\lazywinadmin
-# Refresh Help
-Start-Job -Name "UpdateHelp" -ScriptBlock { Update-Help -Force } | Out-null
-Write-Host "Updating Help in background (Get-Help to check)" -ForegroundColor 'DarkGray'
+
+# Refresh my local help
+Start-Job -Name "UpdateHelp" -ScriptBlock { Update-Help -Force } | Out-Null
+Write-Host "Updating Help in background (Get-Help to check)" -ForegroundColor Yellow
+
 # Show PS Version and date/time
-Write-host "PowerShell Version: $($psversiontable.psversion) - ExecutionPolicy: $(Get-ExecutionPolicy)" -for yellow
+Write-Host "PowerShell Version: $($psversiontable.psversion) - ExecutionPolicy: $(Get-ExecutionPolicy)" -ForegroundColor yellow
+
+# Set Path to Github
+Set-Location $home\onedrive\scripts\github
 
 <#
 # Check Admin Elevation
@@ -31,60 +34,68 @@ $IsAdmin = $WindowsPrincipal.IsInRole($Administrator)
 #  Set Window Title
 if ($isAdmin)
 {
-	$host.UI.RawUI.WindowTitle = "Administrator: $ENV:USERNAME@$ENV:COMPUTERNAME - $env:userdomain"
+    $host.UI.RawUI.WindowTitle = "Administrator: $ENV:USERNAME@$ENV:COMPUTERNAME - $env:userdomain"
 }
 else
 {
-	$host.UI.RawUI.WindowTitle = "$ENV:USERNAME@$ENV:COMPUTERNAME - $env:userdomain"
+    $host.UI.RawUI.WindowTitle = "$ENV:USERNAME@$ENV:COMPUTERNAME - $env:userdomain"
 }
 #>
 
+
+
 ###############
-# Credentials #
+# CREDENTIALS #
 ###############
 
 
 
 ##########
-# Module #
+# MODULE #
 ##########
+
 #  PSReadLine
 Import-Module -Name PSReadline
 
-#########
-# Alias #
-#########
+if (Get-Module -name PSReadline) {
+    # Set Shortcuts for History Search
+    #  Start typing, for example "Get-" then press up and down arrow, it'll show all
+    #  commands in my story that started by "Get-"
+    Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward
+    Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward
+}
+
+
+###########
+# ALIASES #
+###########
 Set-Alias -Name npp -Value notepad++.exe
 Set-Alias -Name np -Value notepad.exe
-if (Test-Path $env:USERPROFILE\OneDrive){$OneDriveRoot = "$env:USERPROFILE\OneDrive"}
+if (Test-Path $env:USERPROFILE\OneDrive) { $OneDriveRoot = "$env:USERPROFILE\OneDrive" }
+
+
 
 #############
 # Functions #
 #############
 
-<#
-
 # This will change the prompt
-function prompt
-{
-	#Get-location
-	Write-output "PS [LazyWinAdmin.com]> "
+function prompt {
+    #Get-location
+    Write-Output "PS [LazyWinAdmin.com]> "
 }
-#>
 
 # Get the current script directory
-function Get-ScriptDirectory
-{
-	if ($hostinvocation -ne $null)
-	{
-		Split-Path $hostinvocation.MyCommand.path
-	}
-	else
-	{
-		Split-Path $script:MyInvocation.MyCommand.Path
-	}
+function Get-ScriptDirectory {
+    if ($null -ne $hostinvocation) {
+        Split-Path $hostinvocation.MyCommand.path
+    }
+    else {
+        Split-Path $script:MyInvocation.MyCommand.Path
+    }
 }
 
+$MyInvocation.MyCommand
 
 # DOT Source External Functions
 $currentpath = Get-ScriptDirectory
@@ -102,10 +113,14 @@ $currentpath = Get-ScriptDirectory
 . (Join-Path -Path $currentpath -ChildPath "\functions\Launch-Office365Admin.ps1")
 
 
-#########
-# Other #
-#########
+############
+# LEARNING #
+############
 
 # Learn something today (show a random cmdlet help and "about" article
-Get-Command -Module Microsoft*,Cim*,PS*,ISE | Get-Random | Get-Help -ShowWindow
+Get-Command -Module Microsoft*, Cim*, PS*, ISE | Get-Random | Get-Help -ShowWindow
 Get-Random -input (Get-Help about*) | Get-Help -ShowWindow
+
+
+# Debugging
+# $ErrorView = $Error.CategoryInfo.gettype()

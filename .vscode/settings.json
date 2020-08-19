@@ -11,5 +11,9 @@
 
     "editor.rulers": [
         80
-    ]
+    ],
+
+    "editor.renderWhitespace": "all",
+
+    "files.trimTrailingWhitespace": true
 }
